@@ -22,10 +22,6 @@
   </Target>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\TestingControllersSample\TestingControllersSample.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.TestHost" Version="6.0.4" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.1.0" />
     <PackageReference Include="Moq" Version="4.17.2" />
@@ -40,9 +36,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Reference Include="TestingControllersSample">
-      <HintPath>..\..\src\TestingControllersSample\bin\Debug\net6\TestingControllersSample.dll</HintPath>
-    </Reference>
+    <ProjectReference Include="..\..\src\TestingControllersSample\TestingControllersSample.csproj" />
   </ItemGroup>
 
 </Project>
