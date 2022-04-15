@@ -54,11 +54,11 @@ namespace TestingControllersSample.Tests.UnitTests
 
         #region snippet_ApiIdeasControllerTests3
         [Theory]
-        [AutoData]
-        public async Task Create_ReturnsNewlyCreatedIdeaForSession(NewIdeaModel newIdea)
+        [AutoDomainData]
+        public async Task Create_ReturnsNewlyCreatedIdeaForSession(NewIdeaModel newIdea, BrainstormSession testSession)
         {
             // Arrange
-            var testSession = GetTestSession();
+            newIdea.SessionId = testSession.Id;
             var mockRepo = new Mock<IBrainstormSessionRepository>();
             mockRepo.Setup(repo => repo.GetByIdAsync(newIdea.SessionId))
                 .ReturnsAsync(testSession);
@@ -102,24 +102,26 @@ namespace TestingControllersSample.Tests.UnitTests
         #endregion
 
         #region snippet_ApiIdeasControllerTests5
-        [Fact]
-        public async Task ForSession_ReturnsIdeasForSession()
+        [Theory]
+        [AutoDomainData]
+        public async Task ForSession_ReturnsIdeasForSession(BrainstormSession testSession)
         {
             // Arrange
-            int testSessionId = 123;
+            string ideaName = "One";
+            testSession.Ideas[0].Name = ideaName;
             var mockRepo = new Mock<IBrainstormSessionRepository>();
-            mockRepo.Setup(repo => repo.GetByIdAsync(testSessionId))
-                .ReturnsAsync(GetTestSession());
+            mockRepo.Setup(repo => repo.GetByIdAsync(testSession.Id))
+                .ReturnsAsync(testSession);
             var controller = new IdeasController(mockRepo.Object);
 
             // Act
-            var result = await controller.ForSession(testSessionId);
+            var result = await controller.ForSession(testSession.Id);
 
             // Assert
             var okResult = Assert.IsType<OkObjectResult>(result);
             var returnValue = Assert.IsType<List<IdeaDTO>>(okResult.Value);
             var idea = returnValue.FirstOrDefault();
-            Assert.Equal("One", idea.Name);
+            idea.Name.Should().Be(ideaName);
         }
         #endregion
 
@@ -142,14 +144,17 @@ namespace TestingControllersSample.Tests.UnitTests
         #endregion
 
         #region snippet_ForSessionActionResult_ReturnsIdeasForSession
-        [Fact]
-        public async Task ForSessionActionResult_ReturnsIdeasForSession()
+        [Theory]
+        [AutoDomainData]
+        public async Task ForSessionActionResult_ReturnsIdeasForSession(BrainstormSession testSession)
         {
             // Arrange
+            string ideasName = "One";
             int testSessionId = 123;
+            testSession.Ideas[0].Name = ideasName;
             var mockRepo = new Mock<IBrainstormSessionRepository>();
             mockRepo.Setup(repo => repo.GetByIdAsync(testSessionId))
-                .ReturnsAsync(GetTestSession());
+                .ReturnsAsync(testSession);
             var controller = new IdeasController(mockRepo.Object);
 
             // Act
@@ -159,7 +164,7 @@ namespace TestingControllersSample.Tests.UnitTests
             var actionResult = Assert.IsType<ActionResult<List<IdeaDTO>>>(result);
             var returnValue = Assert.IsType<List<IdeaDTO>>(actionResult.Value);
             var idea = returnValue.FirstOrDefault();
-            Assert.Equal("One", idea.Name);
+            idea.Name.Should().Be(ideasName);
         }
         #endregion
 
@@ -201,11 +206,13 @@ namespace TestingControllersSample.Tests.UnitTests
 
         #region snippet_CreateActionResult_ReturnsNewlyCreatedIdeaForSession
         [Theory]
-        [AutoData]
-        public async Task CreateActionResult_ReturnsNewlyCreatedIdeaForSession(NewIdeaModel newIdea)
+        [AutoDomainData]
+        public async Task CreateActionResult_ReturnsNewlyCreatedIdeaForSession(
+            NewIdeaModel newIdea,
+            BrainstormSession testSession)
         {
             // Arrange
-            var testSession = GetTestSession();
+            newIdea.SessionId = testSession.Id;
             var mockRepo = new Mock<IBrainstormSessionRepository>();
             mockRepo.Setup(repo => repo.GetByIdAsync(newIdea.SessionId))
                 .ReturnsAsync(testSession);
@@ -227,19 +234,5 @@ namespace TestingControllersSample.Tests.UnitTests
             returnValue.Ideas.LastOrDefault().Description.Should().Be(newIdea.Description);
         }
         #endregion
-
-        private static BrainstormSession GetTestSession()
-        {
-            var session = new BrainstormSession()
-            {
-                DateCreated = new DateTime(2016, 7, 2),
-                Id = 1,
-                Name = "Test One"
-            };
-
-            var idea = new Idea() { Name = "One" };
-            session.AddIdea(idea);
-            return session;
-        }
     }
 }
