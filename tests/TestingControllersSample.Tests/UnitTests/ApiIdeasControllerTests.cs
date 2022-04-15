@@ -53,25 +53,17 @@ namespace TestingControllersSample.Tests.UnitTests
         #endregion
 
         #region snippet_ApiIdeasControllerTests3
-        [Fact]
-        public async Task Create_ReturnsNewlyCreatedIdeaForSession()
+        [Theory]
+        [AutoData]
+        public async Task Create_ReturnsNewlyCreatedIdeaForSession(NewIdeaModel newIdea)
         {
             // Arrange
-            int testSessionId = 123;
-            string testName = "test name";
-            string testDescription = "test description";
             var testSession = GetTestSession();
             var mockRepo = new Mock<IBrainstormSessionRepository>();
-            mockRepo.Setup(repo => repo.GetByIdAsync(testSessionId))
+            mockRepo.Setup(repo => repo.GetByIdAsync(newIdea.SessionId))
                 .ReturnsAsync(testSession);
             var controller = new IdeasController(mockRepo.Object);
 
-            var newIdea = new NewIdeaModel()
-            {
-                Description = testDescription,
-                Name = testName,
-                SessionId = testSessionId
-            };
             mockRepo.Setup(repo => repo.UpdateAsync(testSession))
                 .Returns(Task.CompletedTask)
                 .Verifiable();
@@ -83,9 +75,9 @@ namespace TestingControllersSample.Tests.UnitTests
             var okResult = Assert.IsType<OkObjectResult>(result);
             var returnSession = Assert.IsType<BrainstormSession>(okResult.Value);
             mockRepo.Verify();
-            Assert.Equal(2, returnSession.Ideas.Count());
-            Assert.Equal(testName, returnSession.Ideas.LastOrDefault().Name);
-            Assert.Equal(testDescription, returnSession.Ideas.LastOrDefault().Description);
+            returnSession.Ideas.Count.Should().Be(2);
+            returnSession.Ideas.LastOrDefault().Name.Should().Be(newIdea.Name);
+            returnSession.Ideas.LastOrDefault().Description.Should().Be(newIdea.Description);
         }
         #endregion
 
@@ -190,22 +182,13 @@ namespace TestingControllersSample.Tests.UnitTests
         #endregion
 
         #region snippet_CreateActionResult_ReturnsNotFoundObjectResultForNonexistentSession
-        [Fact]
-        public async Task CreateActionResult_ReturnsNotFoundObjectResultForNonexistentSession()
+        [Theory]
+        [AutoData]
+        public async Task CreateActionResult_ReturnsNotFoundObjectResultForNonexistentSession(NewIdeaModel newIdea)
         {
             // Arrange
-            var nonExistentSessionId = 999;
-            string testName = "test name";
-            string testDescription = "test description";
             var mockRepo = new Mock<IBrainstormSessionRepository>();
             var controller = new IdeasController(mockRepo.Object);
-
-            var newIdea = new NewIdeaModel()
-            {
-                Description = testDescription,
-                Name = testName,
-                SessionId = nonExistentSessionId
-            };
 
             // Act
             var result = await controller.CreateActionResult(newIdea);
