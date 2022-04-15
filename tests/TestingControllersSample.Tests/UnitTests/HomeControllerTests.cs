@@ -50,7 +50,7 @@ public class HomeControllerTests
         // Arrange
         mockRepo.Setup(repo => repo.ListAsync())
             .ReturnsAsync(testSessions);
-        controller.ModelState.AddModelError("SessionName", "Required");
+        controller.ModelState.AddModelError(nameof(HomeController.NewSessionModel.SessionName), "Required");
 
         // Act
         var result = await controller.Index(newSession);
