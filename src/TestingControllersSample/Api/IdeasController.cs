@@ -49,6 +49,7 @@ namespace TestingControllersSample.Api
             }
 
             var session = await _sessionRepository.GetByIdAsync(model.SessionId);
+
             if (session == null)
             {
                 return NotFound(model.SessionId);

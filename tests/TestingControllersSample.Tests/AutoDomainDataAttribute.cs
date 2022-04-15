@@ -1,4 +1,5 @@
 ﻿using AutoFixture;
+using AutoFixture.AutoMoq;
 using AutoFixture.Xunit2;
 using TestingControllersSample.Core.Model;
 
@@ -11,6 +12,7 @@ public class AutoDomainDataAttribute : AutoDataAttribute
         {
             var fixture = new Fixture();
             fixture.Customize<BrainstormSession>(c => c.Do(b => b.AddIdea(fixture.Create<Idea>())));
+            fixture.Customize(new AutoMoqCustomization());
 
             return fixture;
         })
